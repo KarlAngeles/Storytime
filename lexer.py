@@ -153,7 +153,7 @@ neq = r'(isn\'t\ equal\ to' + r'|' + r'is\ not\ equal\ to' + r'|' + r'isn\'t\ re
 id = r'[a-zA-Z]([a-zA-Z\_]*)?'
 s_num = r'\d\.(\d+)' + r'|' + r'\d+'
 fig_num = r'figuratively\ ' + r'([a-zA-Z\,]([a-zA-Z\ \,]*)?)+'
-string = r'\".*\s*\"'
+string = r'\"(\w*|\s*)\"'
 
 p_end = r'The\ end.'
 p_start = 'Once\ upon\ a\ time,'
