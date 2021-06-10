@@ -75,6 +75,7 @@ predict_set_dict = {
     'REMOVE': ['item'],
     'CALLING': ['id'],
     'WITH': ['(', '-', 'not', 'id', 'stringterm', 'nothing', 'true', 'false', 'calling', 'snum', 'pnum', 'a list', 'item', 'pop', 'char', 'length'],
+    'PROGEND': ['EOF'],
 }
 
 def p_program(p):
@@ -89,12 +90,19 @@ def p_program_error(p):
                | PROGSTART statements
                | statements PROGEND
                | PROGSTART
+               | TO
+               | statements
+               | expression
     '''
+    print(p)
     if p[1] == 'to':
-        if p[2] != 'Once upon a time,':
-            raise StorytimeParsingError('Missing program start')
-        elif p[3] != 'The end.':
-            raise StorytimeParsingError('Missing program end')
+        try:
+            if p[2] != 'Once upon a time,':
+                raise StorytimeParsingError('Missing program start')
+            elif p[3] != 'The end.':
+                raise StorytimeParsingError('Missing program end')
+        except:
+            raise StorytimeParsingError('Missing main function')
     elif len(p) == 2 and p[1] == 'Once upon a time,':
         raise StorytimeParsingError('Missing program end')
     else:
@@ -102,7 +110,6 @@ def p_program_error(p):
             raise StorytimeParsingError('Missing program start')
         elif p[2] != 'The end.':
             raise StorytimeParsingError('Missing program end')
-
 
 def p_function_declarations(p):
     '''function_declarations : function_declarations function_declaration
@@ -171,6 +178,7 @@ def p_if_statement(p):
 
 def p_elif_statements(p):
     '''elif_statements : elif_statements elif_statement
+                       | elif_statements else_statement
                        | elif_statement
     '''
     pass
