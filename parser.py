@@ -83,6 +83,27 @@ def p_program(p):
     '''
     pass
 
+def p_program_error(p):
+    '''program : function_declarations statements PROGEND
+               | function_declarations PROGSTART statements
+               | PROGSTART statements
+               | statements PROGEND
+               | PROGSTART
+    '''
+    if p[1] == 'to':
+        if p[2] != 'Once upon a time,':
+            raise StorytimeParsingError('Missing program start')
+        elif p[3] != 'The end.':
+            raise StorytimeParsingError('Missing program end')
+    elif len(p) == 2 and p[1] == 'Once upon a time,':
+        raise StorytimeParsingError('Missing program end')
+    else:
+        if p[1] != 'Once upon a time,':
+            raise StorytimeParsingError('Missing program start')
+        elif p[2] != 'The end.':
+            raise StorytimeParsingError('Missing program end')
+
+
 def p_function_declarations(p):
     '''function_declarations : function_declarations function_declaration
                              | function_declaration
@@ -351,10 +372,10 @@ def get_token():
 
 parser = yacc.yacc()
 
-# while True:
-    # try:
-        # s = input('> ')
-    # except EOFError:
-        # break
-    # if not s: continue
-    # result = parser.parse(s, tokenfunc=get_token, debug=0)
+while True:
+    try:
+        s = input('> ')
+    except EOFError:
+        break
+    if not s: continue
+    result = parser.parse(s, tokenfunc=get_token, debug=0)
