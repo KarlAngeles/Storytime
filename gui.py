@@ -110,6 +110,7 @@ def lex_show():
             output.insert(tk.END, "{}".format(lexing_error))
             output.insert(tk.END, "\n")
             output.configure(state="disabled")
+            break
 
     output.configure(state="disabled")
 
