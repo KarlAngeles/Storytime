@@ -288,6 +288,7 @@ delim11 = ['.', ',', ':', '+', '*', '/', '^', '%', '>', '<', '<=', '>=', '==', '
 delim12 = ['"', '(']
 delim_id = ['"', '(', 'NUMBERS']
 revised_delim_id = ['"', 'NUMBERS']
+whitespace = ['.', ',', ':', '"', '+', '-', '*', '/', '^', '%', '>', '<', '<=', '>=', '==', '!=', '(', ')', 'NUMBERS']
 
 delimDict = {
     # keywords
@@ -298,7 +299,7 @@ delimDict = {
     'ask': delim5,
     'biased': delim4,
     'break': delim7,
-    # ‘calling’:
+    'calling': whitespace,
     'char': delim8,
     'containing': delim6,
     'divided by': delim6,
@@ -306,11 +307,11 @@ delimDict = {
     'false': delim_id,
     'fin': delim7,
     'finish with': delim6,
-    # 'from': 
+    'from': whitespace,
     'go': delim7,
     'hateful': delim4,
     'if': delim6,
-    # 'into': 
+    'into': whitespace,
     'is': delim6,
     'is equal to': delim6,
     "isn' equal to": delim6,
@@ -325,20 +326,21 @@ delimDict = {
     'negative of': delim6,
     'not': delim6,
     'nothing': delim_id,
-    # 'of': 
+    'of': whitespace,
     'or': delim6,
     'otherwise': delim10,
     'plebeian': delim4,
     'plus': delim6,
     'push': delim6,
-    # 'pop': 
+    'pop': whitespace,
     'raised to': delim6,
-    # 'remove': 
+    'remove': whitespace,
     'say': delim6,
     'selfish': delim4,
     'stop': delim7,
     'tasteless': delim4,
     'times': delim6,
+    'to': whitespace,
     'to the power of': delim6,
     'toxic': delim4,
     'trashy': delim4,
@@ -378,42 +380,42 @@ lexer = lex.lex()
 def get_errors():
     return errors
 
-# data = '''
-# to
-# '''
+data = '''
+Once upon a time, say "james". The end.
+'''
 
-# # need to throw error when multiple symbols
-# lexer.input(data)
-# while true:
-    # tok = lexer.token()
-    # if not tok:
-        # break
+# need to throw error when multiple symbols
+lexer.input(data)
+while True:
+    tok = lexer.token()
+    if not tok:
+        break
 
-    # try:
-        # # list of invalid 
+    try:
+        # list of invalid 
 
-        # # accounts for type tokens (id, snum, string) and checks if current token is valid accrdg to prev token
-        # if (previoustoken.type in ['snum', 'string', 'id']):
-            # typeval = delimdict[previoustoken.type]
-            # if (tok.value in typeval or (tok.type == 'snum' and 'numbers' in typeval)):
-                # toks.pop()
-                # raise storytimelexingerror('lexical error: invalid delimiter for "{}" token: [{} {} {} {}]'.format(previoustoken, tok.type, tok.value, tok.lineno, tok.lexpos))
+        # accounts for type tokens (id, snum, string) and checks if current token is valid accrdg to prev token
+        if (previousToken.type in ['SNUM', 'STRING', 'ID']):
+            typeVal = delimDict[previousToken.type]
+            if (tok.value in typeVal or (tok.type == 'SNUM' and 'Numbers' in typeVal)):
+                toks.pop()
+                raise StorytimeLexingError('lexical error: invalid delimiter for "{}" token: [{} {} {} {}]'.format(previousToken, tok.type, tok.value, tok.lineno, tok.lexpos))
 
-        # # checks if current token is valid or invalid 
-        # elif (tok.value in delimdict[previoustoken.value] or (tok.type == 'snum' and 'numbers' in delimdict[previoustoken.value])):
-            # toks.pop()
-            # raise storytimelexingerror('lexical error: invalid delimiter for "{}" token: [{} {} {} {}]'.format(previoustoken, tok.type, tok.value, tok.lineno, tok.lexpos))
+        # checks if current token is valid or invalid 
+        elif (tok.value in delimDict[previousToken.value] or (tok.type == 'snum' and 'numbers' in delimDict[previousToken.value])):
+            toks.pop()
+            raise StorytimeLexingError('lexical error: invalid delimiter for "{}" token: [{} {} {} {}]'.format(previousToken, tok.type, tok.value, tok.lineno, tok.lexpos))
 
-        # # whatever token is read it's added to toks list
-        # previoustoken = tok
-        # toks.append(tok)
-    # except:
-        # previoustoken = tok
-        # toks.append(tok)
+        # whatever token is read it's added to toks list
+        previousToken = tok
+        toks.append(tok)
+    except:
+        previousToken = tok
+        toks.append(tok)
 
-# if (errors):
-    # for error in errors:
-        # print(error)
-# else:
-    # for token in toks:
-        # print(token)
+if (errors):
+    for error in errors:
+        print(error)
+else:
+    for token in toks:
+        print(token)

@@ -380,10 +380,10 @@ def get_token():
 
 parser = yacc.yacc()
 
-while True:
-    try:
-        s = input('> ')
-    except EOFError:
-        break
-    if not s: continue
-    result = parser.parse(s, tokenfunc=get_token, debug=0)
+# while True:
+    # try:
+        # s = input('> ')
+    # except EOFError:
+        # break
+    # if not s: continue
+    # result = parser.parse(s, tokenfunc=get_token, debug=0)

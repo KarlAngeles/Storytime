@@ -70,40 +70,34 @@ def lex_show():
     if rows >= 1:
         for i in range(1, rows):
             table.deleteRow()
+
     toks = []
+    errors = []
     previousToken = ''
+
     while True:
+        tok = l.token()
+        if not tok:
+            output.insert(tk.END, "No lexing error")
+            break
+
         try:
-            tok = l.token()
-            table_data = table.model.data
-            if not tok:
-                output.insert(tk.END, "No lexing error")
-                return
-            row = len(table_data)
-            table_data[row]['lexeme'] = tok.value
+            print('current token: ', tok)
+            print('previous token: ', previousToken)
+            # print('toks: ', toks)
 
-            if (tok.type == 'SNUM' or tok.type == 'ID' or tok.type == 'STRING'):
-                if (tok.type == 'STRING'):
-                    table_data[row]['token'] = 'stringterm'
-                else:
-                    table_data[row]['token'] = tok.type.lower()
-            else:
-                table_data[row]['token'] = tok.value
+            if (previousToken.type in ['SNUM', 'STRING', 'ID']):
+                typeval = lexer.delimDict[previousToken.type]
+                if (tok.value in typeval or (tok.type == 'SNUM' and 'NUMBERS' in typeval)):
+                    toks.pop()
+                    errors.append('Lexical Error: invalid delimiter for "{}" token: [{} {} {} {}]'.format(previousToken, tok.type, tok.value, tok.lineno, tok.lexpos))
 
-            table_data[row]['description'] = desc[tok.type]
-            table.addRow()
-            listVal = lexer.delimDict[previousToken]
-
-            if (tok.value in listVal):
+            # checks if current token is valid or invalid 
+            elif (tok.value in lexer.delimDict[previousToken.value] or (tok.type == 'SNUM' and 'NUMBERS' in lexer.delimdict[previousToken.value])):
                 toks.pop()
-                raise lexer.StorytimeLexingError(
-                    'Lexical error: Invalid delimiter for "{}" token: [{} {} {} {}]'
-                    .format(previousToken, tok.type, tok.value, tok.lineno, tok.lexpos))
+                errors.append('Lexical Error: invalid delimiter for "{}" token: [{} {} {} {}]'.format(previousToken, tok.type, tok.value, tok.lineno, tok.lexpos))
 
-            previousToken = tok.value
-            toks.append(tok)
-        except KeyError:
-            previousToken = tok.value
+            previousToken = tok
             toks.append(tok)
         except lexer.StorytimeLexingError as lexing_error:
             output.configure(state="normal")
@@ -111,6 +105,30 @@ def lex_show():
             output.insert(tk.END, "\n")
             output.configure(state="disabled")
             break
+        except:
+            previousToken = tok
+            toks.append(tok)
+
+    table_data = table.model.data
+
+    for idx, tok in enumerate(toks):
+        table_data[idx + 1]['lexeme'] = tok.value
+        if (tok.type == 'SNUM' or tok.type == 'ID' or tok.type == 'STRING'):
+            if (tok.type == 'STRING'):
+                table_data[idx + 1]['token'] = 'stringterm'
+            else:
+                table_data[idx + 1]['token'] = tok.type.lower()
+        else:
+            table_data[idx + 1]['token'] = tok.value
+
+        table_data[idx + 1]['description'] = desc[tok.type]
+        table.addRow()
+
+    for error in errors:
+        output.configure(state="normal")
+        output.insert(tk.END, error)
+        output.insert(tk.END, "\n")
+        output.configure(state="disabled")
 
     output.configure(state="disabled")
 

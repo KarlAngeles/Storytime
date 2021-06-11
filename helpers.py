@@ -56,8 +56,10 @@ desc = {
   'GTE' : '>=',
   'LTE' : '<=',
   'L_PAR' : '(',
-  'R_PAR' : ')'
+  'R_PAR' : ')',
+  'TO': 'to'
 }
+
 
 
 predict_set_dict = {
@@ -69,7 +71,7 @@ predict_set_dict = {
     'COLON': ['stringterm', 'String_wsub', 'id', 'nothing', 'true', 'false', 'item', 'not' 'pop', 'push', 'continue', 'break', 'if', 'unless', 'otherwise', 'snum', 'pnum', 'length', '(', 'say', 'ask', 'char', 'remove', 'calling', 'while', 'a list'],
     'COMMA': ['(', '-', 'not', 'id', 'stringterm', 'nothing', 'true', 'false', 'calling', 'snum', 'pnum', 'a list', 'item', 'pop', 'char', 'length'],
     'DIVIDE': ['(', '-', 'not', 'id', 'stringterm', 'nothing', 'true', 'false', 'calling', 'snum', 'pnum', 'a list', 'item', 'pop', 'char', 'length'],
-    'DOT': ['stringterm', 'String_wsub', 'id', 'nothing', 'true', 'false', 'item', 'not' 'pop', 'push', 'continue', 'break', 'if', 'unless', 'otherwise', 'snum', 'pnum', 'length', '(', 'say', 'ask', 'char', 'remove', 'calling', 'while', 'a list'],
+    'DOT': ['stringterm', 'String_wsub', 'id', 'nothing', 'true', 'false', 'item', 'not', 'pop', 'push', 'continue', 'break', 'if', 'unless', 'otherwise', 'snum', 'pnum', 'length', '(', 'say', 'ask', 'char', 'remove', 'calling', 'while', 'a list', 'fin'],
     'ELIF': ['(', '-', 'not', 'id', 'stringterm', 'nothing', 'true', 'false', 'calling', 'snum', 'pnum', 'a list', 'item', 'pop', 'char', 'length'],
     'ELSE': [':'],
     'EQ': ['(', '-', 'not', 'id', 'stringterm', 'nothing', 'true', 'false', 'calling', 'snum', 'pnum', 'a list', 'item', 'pop', 'char', 'length'],
@@ -114,6 +116,7 @@ predict_set_dict = {
     'REMOVE': ['item'],
     'CALLING': ['id'],
     'WITH': ['(', '-', 'not', 'id', 'stringterm', 'nothing', 'true', 'false', 'calling', 'snum', 'pnum', 'a list', 'item', 'pop', 'char', 'length'],
+    'PROGEND': ['EOF'],
 }
 
 def poetic_to_specific(numbers):
