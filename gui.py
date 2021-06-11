@@ -25,15 +25,9 @@ class StorytimeTable(TableCanvas):
         self.clearSelected()
         self.redrawTable()
 
-data = {1: {'lexeme': '', 'token': '', 'description': ''}}
 
 top = tk.Frame(window, height=50, width=50)
 mid = tk.Frame(window, height=50, width=150, background="#EFEFEF")
-table_frame = tk.Frame(mid, background="#EFEFEF")
-table_frame.grid(column=1, row=0)
-table = StorytimeTable(table_frame, data=data,
-                       read_only=True, height=530, thefont=('monospace', 15))
-table.show()
 bot = tk.Frame(window, height=25, width=50, background="#EFEFEF")
 
 top.grid(row=0)
@@ -55,6 +49,13 @@ code = tk.scrolledtext.ScrolledText(
     mid, height=25, width=60, font=('monospace', 13))
 code.grid(row=0, column=0)
 
+lexemes = tk.scrolledtext.ScrolledText(
+        mid, height=25, width=25, font=('monospace', 13))
+lexemes.grid(row=0, column=1)
+tokens = tk.scrolledtext.ScrolledText(
+        mid, height=25, width=25, font=('monospace', 13))
+tokens.grid(row=0, column=2)
+
 output = tk.scrolledtext.ScrolledText(
     bot, state="disabled", height=10, width=70, font=('monospace', 10), borderwidth=0)
 output.grid(row=0, column=0, padx=15)
@@ -63,17 +64,17 @@ output.grid(row=0, column=0, padx=15)
 def lex_show():
     output.configure(state="normal")
     output.delete("1.0", tk.END)
+    lexemes.delete("1.0", tk.END)
+    tokens.delete("1.0", tk.END)
     data = code.get("1.0", tk.END)
     l = lex.lex(module=lexer)
     l.input(data)
-    rows = len(table.model.data)
-    if rows >= 1:
-        for i in range(1, rows):
-            table.deleteRow()
 
     toks = []
     errors = []
     previousToken = ''
+    lexemes.insert(tk.END, 'Lexemes\n')
+    tokens.insert(tk.END, 'Tokens\n')
 
     while True:
         tok = l.token()
@@ -82,10 +83,6 @@ def lex_show():
             break
 
         try:
-            print('current token: ', tok)
-            print('previous token: ', previousToken)
-            # print('toks: ', toks)
-
             if (previousToken.type in ['SNUM', 'STRING', 'ID']):
                 typeval = lexer.delimDict[previousToken.type]
                 if (tok.value in typeval or (tok.type == 'SNUM' and 'NUMBERS' in typeval)):
@@ -109,20 +106,16 @@ def lex_show():
             previousToken = tok
             toks.append(tok)
 
-    table_data = table.model.data
 
     for idx, tok in enumerate(toks):
-        table_data[idx + 1]['lexeme'] = tok.value
+        lexemes.insert(tk.END, "\n" + tok.value)
         if (tok.type == 'SNUM' or tok.type == 'ID' or tok.type == 'STRING'):
             if (tok.type == 'STRING'):
-                table_data[idx + 1]['token'] = 'stringterm'
+                tokens.insert(tk.END, "\n" + 'stringterm')
             else:
-                table_data[idx + 1]['token'] = tok.type.lower()
+                tokens.insert(tk.END, "\n" + tok.type.lower())
         else:
-            table_data[idx + 1]['token'] = tok.value
-
-        table_data[idx + 1]['description'] = desc[tok.type]
-        table.addRow()
+            tokens.insert(tk.END, "\n" + tok.value)
 
     for error in errors:
         output.configure(state="normal")
