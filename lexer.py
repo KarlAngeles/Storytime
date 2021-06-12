@@ -380,42 +380,42 @@ lexer = lex.lex()
 def get_errors():
     return errors
 
-data = '''
-Once upon a time, say "james". The end.
-'''
+# data = '''
+# Once upon a 
+# '''
 
-# need to throw error when multiple symbols
-lexer.input(data)
-while True:
-    tok = lexer.token()
-    if not tok:
-        break
+# # need to throw error when multiple symbols
+# lexer.input(data)
+# while True:
+    # tok = lexer.token()
+    # if not tok:
+        # break
 
-    try:
-        # list of invalid 
+    # try:
+        # # list of invalid 
 
-        # accounts for type tokens (id, snum, string) and checks if current token is valid accrdg to prev token
-        if (previousToken.type in ['SNUM', 'STRING', 'ID']):
-            typeVal = delimDict[previousToken.type]
-            if (tok.value in typeVal or (tok.type == 'SNUM' and 'Numbers' in typeVal)):
-                toks.pop()
-                raise StorytimeLexingError('lexical error: invalid delimiter for "{}" token: [{} {} {} {}]'.format(previousToken, tok.type, tok.value, tok.lineno, tok.lexpos))
+        # # accounts for type tokens (id, snum, string) and checks if current token is valid accrdg to prev token
+        # if (previousToken.type in ['SNUM', 'STRING', 'ID']):
+            # typeVal = delimDict[previousToken.type]
+            # if (tok.value in typeVal or (tok.type == 'SNUM' and 'Numbers' in typeVal)):
+                # toks.pop()
+                # raise StorytimeLexingError('lexical error: invalid delimiter for "{}" token: [{} {} {} {}]'.format(previousToken, tok.type, tok.value, tok.lineno, tok.lexpos))
 
-        # checks if current token is valid or invalid 
-        elif (tok.value in delimDict[previousToken.value] or (tok.type == 'snum' and 'numbers' in delimDict[previousToken.value])):
-            toks.pop()
-            raise StorytimeLexingError('lexical error: invalid delimiter for "{}" token: [{} {} {} {}]'.format(previousToken, tok.type, tok.value, tok.lineno, tok.lexpos))
+        # # checks if current token is valid or invalid 
+        # elif (tok.value in delimDict[previousToken.value] or (tok.type == 'snum' and 'numbers' in delimDict[previousToken.value])):
+            # toks.pop()
+            # raise StorytimeLexingError('lexical error: invalid delimiter for "{}" token: [{} {} {} {}]'.format(previousToken, tok.type, tok.value, tok.lineno, tok.lexpos))
 
-        # whatever token is read it's added to toks list
-        previousToken = tok
-        toks.append(tok)
-    except:
-        previousToken = tok
-        toks.append(tok)
+        # # whatever token is read it's added to toks list
+        # previousToken = tok
+        # toks.append(tok)
+    # except:
+        # previousToken = tok
+        # toks.append(tok)
 
-if (errors):
-    for error in errors:
-        print(error)
-else:
-    for token in toks:
-        print(token)
+# if (errors):
+    # for error in errors:
+        # print(error)
+# else:
+    # for token in toks:
+        # print(token)

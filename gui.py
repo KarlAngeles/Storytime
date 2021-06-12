@@ -61,6 +61,9 @@ output = tk.scrolledtext.ScrolledText(
 output.grid(row=0, column=0, padx=15)
 
 
+toks = []
+errors = []
+
 def lex_show():
     output.configure(state="normal")
     output.delete("1.0", tk.END)
@@ -70,6 +73,9 @@ def lex_show():
     l = lex.lex(module=lexer)
     l.input(data)
 
+    global toks
+    global errors
+
     toks = []
     errors = []
     previousToken = ''
@@ -77,34 +83,35 @@ def lex_show():
     tokens.insert(tk.END, 'Tokens\n')
 
     while True:
-        tok = l.token()
-        if not tok:
-            output.insert(tk.END, "No lexing error")
-            break
-
         try:
-            if (previousToken.type in ['SNUM', 'STRING', 'ID']):
-                typeval = lexer.delimDict[previousToken.type]
-                if (tok.value in typeval or (tok.type == 'SNUM' and 'NUMBERS' in typeval)):
+            tok = l.token()
+            if not tok:
+                break
+
+            try:
+                if (previousToken.type in ['SNUM', 'STRING', 'ID']):
+                    typeval = lexer.delimDict[previousToken.type]
+                    if (tok.value in typeval or (tok.type == 'SNUM' and 'NUMBERS' in typeval)):
+                        toks.pop()
+                        errors.append('Lexical Error: invalid delimiter for "{}" token: [{} {} {} {}]'.format(previousToken, tok.type, tok.value, tok.lineno, tok.lexpos))
+
+                # checks if current token is valid or invalid 
+                elif (tok.value in lexer.delimDict[previousToken.value] or (tok.type == 'SNUM' and 'NUMBERS' in lexer.delimdict[previousToken.value])):
                     toks.pop()
                     errors.append('Lexical Error: invalid delimiter for "{}" token: [{} {} {} {}]'.format(previousToken, tok.type, tok.value, tok.lineno, tok.lexpos))
 
-            # checks if current token is valid or invalid 
-            elif (tok.value in lexer.delimDict[previousToken.value] or (tok.type == 'SNUM' and 'NUMBERS' in lexer.delimdict[previousToken.value])):
-                toks.pop()
-                errors.append('Lexical Error: invalid delimiter for "{}" token: [{} {} {} {}]'.format(previousToken, tok.type, tok.value, tok.lineno, tok.lexpos))
+                previousToken = tok
+                toks.append(tok)
+            except:
+                previousToken = tok
+                toks.append(tok)
 
-            previousToken = tok
-            toks.append(tok)
         except lexer.StorytimeLexingError as lexing_error:
             output.configure(state="normal")
             output.insert(tk.END, "{}".format(lexing_error))
             output.insert(tk.END, "\n")
             output.configure(state="disabled")
-            break
-        except:
-            previousToken = tok
-            toks.append(tok)
+            return
 
 
     for idx, tok in enumerate(toks):
@@ -123,50 +130,98 @@ def lex_show():
         output.insert(tk.END, "\n")
         output.configure(state="disabled")
 
+    output.insert(tk.END, "No lexing error")
     output.configure(state="disabled")
 
+# last_token = None
+# second_last_token = None
+# # After clicking lex, then parse, what happens is that the lexer finishes evaluation
+# def get_token():
+    # global last_token
+    # global second_last_token
+    # second_last_token = last_token
+    # last_token = lexer.lexer.token()
 
-last_token = None
-second_last_token = None
-
-def get_token():
-    global last_token
-    global second_last_token
-    second_last_token = last_token
-    last_token = lexer.lexer.token()
-    print('first: ', last_token)
-    print('second: ', second_last_token)
-    return last_token
+    # print('second: ', second_last_token)
+    # print('last: ', last_token)
+    # return last_token
 
 def parse_show():
     output.configure(state="normal")
     output.delete("1.0", tk.END)
     data = code.get("1.0", tk.END)
+    l = lex.lex(module=lexer)
+    l.input(data)
+
     try:
+        if len(errors) != 0:
+            for error in errors:
+                output.configure(state="normal")
+                output.insert(tk.END, error)
+                output.insert(tk.END, "\n")
+                output.configure(state="disabled")
+                return
+
         p = yacc.yacc(module=parser)
-        res = p.parse(data, tokenfunc=get_token, debug=0)
+        # p.parse(data, lexer=l, tokenfunc=get_token)
+        p.parse(data, lexer=l)
         output.configure(state="normal")
         output.insert(tk.END, "great success!")
         output.configure(state="disabled")
         return
-    except parser.StorytimeParsingError as parsing_error:
-        try:
-            message = ' '.join(predict_set_dict[second_last_token.type])
-            output.configure(state="normal")
-            output.insert(tk.END, "Unexpected {} Expected {}".format(last_token.value, message))
-            output.insert(tk.END, "\n")
-            output.configure(state="disabled")
-        except:
-            output.configure(state="normal")
-            output.insert(tk.END, "{}".format(parsing_error))
-            output.insert(tk.END, "\n")
-            output.configure(state="disabled")
     except lexer.StorytimeLexingError as lexing_error:
+        print('lexical error')
         output.configure(state="normal")
         output.insert(tk.END, "{}".format(lexing_error))
-        output.insert(tk.END, "\nCannot proceed to parse")
         output.insert(tk.END, "\n")
         output.configure(state="disabled")
+        return
+    except parser.StorytimeParsingError as parsing_error:
+        if len(errors) != 0:
+            for error in errors:
+                output.configure(state="normal")
+                output.insert(tk.END, error)
+                output.insert(tk.END, "\n")
+                output.configure(state="disabled")
+                return
+        try:
+            for idx, tok in enumerate(toks):
+                if (str(tok) == str(parsing_error)):
+                    # print(toks)
+                    # print(toks[idx-1])
+                    message = ' '.join(predict_set_dict[toks[idx - 1].type]) # second last token type
+                    output.configure(state="normal")
+                    output.insert(tk.END, "Unexpected {} Expected {}".format(tok.value, message))
+                    output.insert(tk.END, "\n")
+                    output.configure(state="disabled")
+                    return
+
+            output.configure(state="normal")
+            output.insert(tk.END, "Syntax Error: {}".format(parsing_error))
+            output.insert(tk.END, "\n")
+            output.configure(state="disabled")
+            return
+        except:
+            output.configure(state="normal")
+            output.insert(tk.END, "Syntax Error: {}".format(parsing_error))
+            output.insert(tk.END, "\n")
+            output.configure(state="disabled")
+            return
+    # except:
+        # try:
+            # maybe find matching token from tok list then second last token type is index before that
+            # message = ' '.join(predict_set_dict[second_last_token.type])
+            # output.configure(state="normal")
+            # output.insert(tk.END, "Unexpected {} Expected {}".format(last_token.value, message))
+            # output.insert(tk.END, "\n")
+            # output.configure(state="disabled")
+            # return
+        # except parser.StorytimeParsingError as parsing_error:
+            # output.configure(state="normal")
+            # output.insert(tk.END, "{}".format(parsing_error))
+            # output.insert(tk.END, "\n")
+            # output.configure(state="disabled")
+            # return
 
 lex_button = tk.Button(
     bot,

@@ -364,8 +364,9 @@ def p_boolean(p):
 def p_error(p):
     if p:
         try:
-            message = ' '.join(predict_set_dict[second_last_token.type])
-            raise StorytimeParsingError('Syntax Error: Unexpected {} Expected {}'.format(p.value, message))
+            # message = ' '.join(predict_set_dict[second_last_token.type])
+            raise StorytimeParsingError(p)
+            # raise StorytimeParsingError('Syntax Error: Unexpected {} Expected {}'.format(p.value, message))
         except KeyError as error:
             raise StorytimeParsingError('Syntax Error: [{} {} {} {}]'.format(p.type, p.value, p.lineno, p.lexpos))
         except AttributeError as error:
