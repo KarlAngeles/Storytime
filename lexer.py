@@ -151,9 +151,9 @@ neq = r'(isn\'t\ equal\ to' + r'|' + r'is\ not\ equal\ to' + r'|' + r'isn\'t\ re
 # lte = r'(less\ than\ or\ equal\ to' + r'|' + r'<=)'
 
 id = r'[a-zA-Z]([a-zA-Z\_]*)?'
-s_num = r'\d\.(\d+)' + r'|' + r'\d+'
+s_num = r'\-?\d\.(\d+)' + r'|' + r'\d+'
 fig_num = r'figuratively\ ' + r'([a-zA-Z\,]([a-zA-Z\ \,]*)?)+'
-string = r'\"(\w*|\s*)+\"'
+string = r'\"(\w*|\s*|[|\^&+\-%*/=!>]*)+\"'
 
 p_end = r'The\ end.'
 p_start = 'Once\ upon\ a\ time,'
@@ -168,6 +168,15 @@ def t_PROGSTART(t):
 
 @lex.TOKEN(p_end)
 def t_PROGEND(t):
+    return t
+
+@lex.TOKEN(s_num)
+def t_SNUM(t):
+    if (type(t.value) == float):
+        t.value = float(t.value)
+    elif (type(t.value) == int):
+        t.value = int(t.value)
+
     return t
 
 @lex.TOKEN(ret)
@@ -215,15 +224,6 @@ def t_FIGNUM(t):
     # need to fix this
     # if t.value in reserved:
         # raise StorytimeLexingError("Lexical Error: Poetic numbers cannot contain reserved words")
-    return t
-
-@lex.TOKEN(s_num)
-def t_SNUM(t):
-    if (type(t.value) == float):
-        t.value = float(t.value)
-    elif (type(t.value) == int):
-        t.value = int(t.value)
-
     return t
 
 @lex.TOKEN(list_token)
